@@ -16,6 +16,9 @@ Bookmarks work again! All my old bookmarks, I carry around since OC 5 are still 
 
 May the source be with you!
 
+CAVEEAT:
+The integrity check on the bookmarks app will fail, but it will work nonetheless. I do not know how to correct this issue, sorry.
+
 
 Original README:
 Bookmarks app
