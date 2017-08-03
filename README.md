@@ -1,3 +1,23 @@
+FORK NOTICE:
+
+The original maintainer seems not to be interested to make this niffty tool work under owncloud 10.
+
+Since there is a pull request in the main repo to make this work with owncloud 10, I forked and applied the patches.
+
+Install and activate: 
+- fork or download into an directory in apps directory of your owncloud installation
+- goto Admin Settings > Administration > Apps
+- click "show deactivated Apps" (wording might be different, my owncloud is in german language)
+- activate bookmarks
+
+You will be send to the update page, the update throws some Errors, but nothing serious.
+
+Bookmarks work again! All my old bookmarks, I carry around since OC 5 are still there and lived happy after.
+
+May the source be with you!
+mondjunge
+
+Original README:
 Bookmarks app
 ============
 
