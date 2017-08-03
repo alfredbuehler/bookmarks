@@ -15,7 +15,7 @@ You will be send to the update page, the update throws some Errors, but nothing 
 Bookmarks work again! All my old bookmarks, I carry around since OC 5 are still there and lived happy after.
 
 May the source be with you!
-mondjunge
+
 
 Original README:
 Bookmarks app
