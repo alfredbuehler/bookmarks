@@ -3,12 +3,13 @@
 	<id>bookmarks</id>
 	<name>Bookmarks</name>
 	<description>Bookmark manager for ownCloud</description>
+    <summary>Bookmark manager for ownCloud</summary>
 	<licence>AGPL</licence>
 	<author>Arthur Schiwon, Marvin Thomas Rabe, Stefan Klemm</author>
 	<version>0.10.0</version>
 	<documentation>
-            <user>https://doc.owncloud.org/server/9.0/user_manual/bookmarks.html</user>
-        </documentation>
+        <user>https://doc.owncloud.org/server/9.0/user_manual/bookmarks.html</user>
+    </documentation>
 	<category>productivity</category>
 	<website>https://github.com/mondjunge/bookmarks</website>
 	<bugs>https://github.com/mondjunge/bookmarks/issues</bugs>
