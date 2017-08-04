@@ -61,7 +61,7 @@ appstore:
 	controller \
 	css \
 	img \
-  js \
+	js \
 	l10n \
 	templates \
 	$(appstore_package_name)
