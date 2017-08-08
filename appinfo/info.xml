@@ -75,7 +75,6 @@ Rewrite by [Stefan Klemm] aka ganomi (https://github.com/ganomi)
 - sortby takes and attribute that results will be sorted by descending.
     </description>
     <summary>Bookmark manager for ownCloud</summary>
-    <bugs>https://github.com/mondjunge/bookmarks/issues</bugs>
 	<licence>AGPL</licence>
 	<author>Arthur Schiwon, Marvin Thomas Rabe, Stefan Klemm</author>
 	<version>0.10.1</version>
