@@ -50,7 +50,7 @@ Rewrite by [Stefan Klemm] aka ganomi (https://github.com/ganomi)
 
 #### Example Url
 ```
-../apps/bookmarks/public/rest/v1/bookmark?user=username&password=password&tags[]=firsttag&tags[]=anothertag&select[]=description&conjunction=AND&sortby=description
+../apps/bookmarks/public/rest/v1/bookmark?user=username&amp;password=password&amp;tags[]=firsttag&amp;tags[]=anothertag&amp;select[]=description&amp;conjunction=AND&amp;sortby=description
 ```
 
 #### Parameters
@@ -69,9 +69,7 @@ Rewrite by [Stefan Klemm] aka ganomi (https://github.com/ganomi)
 	<website>https://github.com/mondjunge/bookmarks</website>
 	<bugs>https://github.com/mondjunge/bookmarks/issues</bugs>
 	<repository type="git">https://github.com/mondjunge/bookmarks.git</repository>
-    <screenshot>
-        https://raw.githubusercontent.com/mondjunge/bookmarks/master/screenshots/main.png
-    </screenshot>
+    <screenshot>https://raw.githubusercontent.com/mondjunge/bookmarks/master/screenshots/main.png</screenshot>
 	<dependencies>
 		<owncloud min-version="9.0" max-version="10.0" />
 	</dependencies>
