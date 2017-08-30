@@ -4,7 +4,7 @@ namespace OCA\Bookmarks\Controller\Rest;
 
 use \OCP\AppFramework\ApiController;
 use \OCP\IRequest;
-use \OCP\IDb;
+use \OCP\AppFramework\Http;
 use \OCP\AppFramework\Http\JSONResponse;
 use \OC\User\Manager;
 use OCA\Bookmarks\Controller\Lib\Bookmarks;
@@ -12,17 +12,21 @@ use OCP\Util;
 
 class PublicController extends ApiController {
 
-	private $db;
 	private $userManager;
+	
+	private $userId;
 
-	public function __construct($appName, IRequest $request, IDb $db, Manager $userManager) {
-		parent::__construct(
-				$appName, $request);
+	/** @var Bookmarks */
+	protected $bookmarks;
 
-		$this->db = $db;
+	public function __construct($appName, IRequest $request, $userId, Bookmarks $bookmarks, Manager $userManager) {
+		parent::__construct($appName, $request);
+
+		$this->bookmarks = $bookmarks;
 		$this->userManager = $userManager;
+		$this->userId = $userId;
 	}
-
+	
 	/**
 	 * @param string $user
 	 * @param string $password
@@ -73,7 +77,7 @@ class PublicController extends ApiController {
 			$attributesToSelect = array_unique($attributesToSelect);
 		}
 
-		$output = Bookmarks::findBookmarks($user, $this->db, 0, $sortby, $tags, true, -1, $public, $attributesToSelect, $conjunction);
+		$output = $this->bookmarks->findBookmarks($user, 0, $sortby, $tags, true, -1, $public, $attributesToSelect, $conjunction);
 
 		if (count($output) == 0) {
 			$output["status"] = 'error';
@@ -95,4 +99,16 @@ class PublicController extends ApiController {
 		return new JSONResponse($output);
 	}
 
+	/**
+	 * Checks whether parse_url was able to return proper URL data
+	 *
+	 * @param bool|array $urlData result of parse_url
+	 * @return bool
+	 */
+	protected function isProperURL($urlData) {
+		if ($urlData === false || !isset($urlData['scheme']) || !isset($urlData['host'])) {
+			return false;
+		}
+		return true;
+	}
 }

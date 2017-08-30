@@ -1,8 +1,6 @@
 <?php
 
 /**
- * ownCloud - bookmarks
- *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
  * @author Marvin Thomas Rabe <mrabe@marvinrabe.de>
@@ -15,11 +13,14 @@
 
 namespace OCA\Bookmarks\AppInfo;
 
+use OCA\Bookmarks\Controller\Lib\Bookmarks;
 use \OCP\AppFramework\App;
 use \OCP\IContainer;
 use \OCA\Bookmarks\Controller\WebViewController;
 use OCA\Bookmarks\Controller\Rest\TagsController;
 use OCA\Bookmarks\Controller\Rest\BookmarkController;
+use OCA\Bookmarks\Controller\Rest\InternalTagsController;
+use OCA\Bookmarks\Controller\Rest\InternalBookmarkController;
 use OCA\Bookmarks\Controller\Rest\PublicController;
 use OCP\IUser;
 
@@ -45,48 +46,76 @@ class Application extends App {
 				$c->query('Request'),
 				$uid,
 				$c->query('ServerContainer')->getURLGenerator(),
-				$c->query('ServerContainer')->getDb()
+				$c->query('ServerContainer')->query(Bookmarks::class)
 			);
 		});
 
 		$container->registerService('BookmarkController', function($c) {
-			if(method_exists($c->query('ServerContainer'), 'getL10NFactory')) {
-				$l = $c->query('ServerContainer')->getL10NFactory()->get('bookmarks');
-			} else {
-				// OC 8.1 compatibility
-				$l = new \OC_L10N('bookmarks');
-			}
-
 			/** @var IContainer $c */
+			$user = $c->query('ServerContainer')->getUserSession()->getUser();
+			$uid = is_null($user) ? null : $user->getUID();
 			return new BookmarkController(
 				$c->query('AppName'),
 				$c->query('Request'),
-				$c->query('ServerContainer')->getUserSession()->getUser()->getUID(),
-				$c->query('ServerContainer')->getDb(),
-				$l
+				$uid,
+				$c->query('ServerContainer')->getDatabaseConnection(),
+				$c->query('ServerContainer')->getL10NFactory()->get('bookmarks'),
+				$c->query('ServerContainer')->query(Bookmarks::class),
+				$c->query('ServerContainer')->getUserManager()
+			);
+		});
+		
+		$container->registerService('InternalBookmarkController', function($c) {
+			/** @var IContainer $c */
+			$user = $c->query('ServerContainer')->getUserSession()->getUser();
+			$uid = is_null($user) ? null : $user->getUID();
+			return new InternalBookmarkController(
+				$c->query('AppName'),
+				$c->query('Request'),
+				$uid,
+				$c->query('ServerContainer')->getDatabaseConnection(),
+				$c->query('ServerContainer')->getL10NFactory()->get('bookmarks'),
+				$c->query('ServerContainer')->query(Bookmarks::class),
+				$c->query('ServerContainer')->getUserManager()
 			);
 		});
 
 		$container->registerService('TagsController', function($c) {
 			/** @var IContainer $c */
+			$user = $c->query('ServerContainer')->getUserSession()->getUser();
+			$uid = is_null($user) ? null : $user->getUID();
 			return new TagsController(
 				$c->query('AppName'),
 				$c->query('Request'),
-				$c->query('ServerContainer')->getUserSession()->getUser()->getUID(),
-				$c->query('ServerContainer')->getDb()
+				$uid,
+				$c->query('ServerContainer')->query(Bookmarks::class)
+			);
+		});
+		
+		$container->registerService('InternalTagsController', function($c) {
+			/** @var IContainer $c */
+			$user = $c->query('ServerContainer')->getUserSession()->getUser();
+			$uid = is_null($user) ? null : $user->getUID();
+			return new InternalTagsController(
+				$c->query('AppName'),
+				$c->query('Request'),
+				$uid,
+				$c->query('ServerContainer')->query(Bookmarks::class)
 			);
 		});
 
 		$container->registerService('PublicController', function($c) {
 			/** @var IContainer $c */
+			$user = $c->query('ServerContainer')->getUserSession()->getUser();
+			$uid = is_null($user) ? null : $user->getUID();
 			return new PublicController(
 				$c->query('AppName'),
 				$c->query('Request'),
-				$c->query('ServerContainer')->getDb(),
+				$uid,
+				$c->query('ServerContainer')->query(Bookmarks::class),
 				$c->query('ServerContainer')->getUserManager()
 			);
 		});
-
 	}
 
 }

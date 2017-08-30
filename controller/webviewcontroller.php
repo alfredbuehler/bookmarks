@@ -1,8 +1,6 @@
 <?php
 
 /**
- * ownCloud - bookmarks
- *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
  *
@@ -16,7 +14,6 @@ use OCP\AppFramework\Http\ContentSecurityPolicy;
 use \OCP\IRequest;
 use \OCP\AppFramework\Http\TemplateResponse;
 use \OCP\AppFramework\Controller;
-use \OCP\IDb;
 use \OCA\Bookmarks\Controller\Lib\Bookmarks;
 use OCP\IURLGenerator;
 
@@ -28,8 +25,8 @@ class WebViewController extends Controller {
 	/** @var IURLGenerator  */
 	private $urlgenerator;
 
-	/** @var IDb  */
-	private $db;
+	/** @var Bookmarks */
+	private $bookmarks;
 
 	/**
 	 * WebViewController constructor.
@@ -38,13 +35,13 @@ class WebViewController extends Controller {
 	 * @param IRequest $request
 	 * @param $userId
 	 * @param IURLGenerator $urlgenerator
-	 * @param IDb $db
+	 * @param Bookmarks $bookmarks
 	 */
-	public function __construct($appName, IRequest $request, $userId, IURLGenerator $urlgenerator, IDb $db) {
+	public function __construct($appName, IRequest $request, $userId, IURLGenerator $urlgenerator, Bookmarks $bookmarks) {
 		parent::__construct($appName, $request);
 		$this->userId = $userId;
 		$this->urlgenerator = $urlgenerator;
-		$this->db = $db;
+		$this->bookmarks = $bookmarks;
 	}
 
 	/**
@@ -72,11 +69,11 @@ class WebViewController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function bookmarklet($url = "", $title = "") {
-		$bookmarkExists = Bookmarks::bookmarkExists($url, $this->userId, $this->db);
+		$bookmarkExists = $this->bookmarks->bookmarkExists($url, $this->userId);
 		$description = "";
         $tags = [];
 		if ($bookmarkExists !== false){
-			$bookmark = Bookmarks::findUniqueBookmark($bookmarkExists, $this->userId, $this->db);
+			$bookmark = $this->bookmarks->findUniqueBookmark($bookmarkExists, $this->userId);
 			$description = $bookmark['description'];
             $tags = $bookmark['tags'];
 		}
