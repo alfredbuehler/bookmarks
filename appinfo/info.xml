@@ -64,7 +64,7 @@ Rewrite by [Stefan Klemm] aka ganomi (https://github.com/ganomi)
     <summary>Bookmark manager for ownCloud</summary>
 	<licence>AGPL</licence>
 	<author>Arthur Schiwon, Marvin Thomas Rabe, Stefan Klemm</author>
-	<version>0.10.1</version>
+	<version>0.10.2</version>
 	<category>productivity</category>
 	<website>https://github.com/mondjunge/bookmarks</website>
 	<bugs>https://github.com/mondjunge/bookmarks/issues</bugs>
