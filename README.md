@@ -1,23 +1,17 @@
 Bookmarks app
 ============
 
-![](https://github.com/nextcloud/bookmarks/raw/master/screenshots/Bookmarks.png)
+![](https://github.com/mondjunge/bookmarks/raw/master/screenshots/main.png)
 
 Maintainers:
 ------------
 - [Blizzz](https://github.com/Blizzz)
 - [Marcel Klehr](https://github.com/marcelklehr)
 
-Useful companion apps for Browsers/Android:
---------------------
-- [Nextcloud Bookmarks - Android app with full add/edit/delete and view functionallity](https://github.com/theScrabi/OCBookmarks)
-- [Floccus - Bookmark sync for Firefox/Chromium-based browsers](https://github.com/marcelklehr/floccus)
-- [NCBookmarks - App to view/edit/open bookmarks for Android](https://github.com/lenchan139/NCBookmark)
-
 Developer setup info:
 ---------------------
 ### Installation:
-Install it from the app store in Nextcloud itself or just clone this repo into your apps directory on your server.
+Install it from the app store in owncloud itself or just clone this repo into your apps directory on your server.
 
 
 Status :
@@ -28,7 +22,7 @@ Rewrite by [Stefan Klemm] aka ganomi (https://github.com/ganomi)
 * Dependency Injection for user and db is used througout the controllers
 * The Routing features a consistent rest api
 * The Routing provides some legacy routes, so that for exampe the Android Bookmarks App still works.
-* Merged all the changes from https://github.com/nextcloud/bookmarks/pull/68 and added visual fixes. App uses the App Framework Styling on the Client side now.
+* Merged all the changes from https://github.com/nextcloud/bookmarks/
 
 There is a publicly available api that provides access to bookmarks per user. (This is usefull in connection with the Wordpress Plugin https://github.com/mario-nolte/oc2wp-bookmarks)
 
