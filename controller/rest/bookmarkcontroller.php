@@ -1,8 +1,6 @@
 <?php
 
 /**
- * ownCloud - bookmarks
- *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the COPYING file.
  *
@@ -12,12 +10,13 @@
 
 namespace OCA\Bookmarks\Controller\Rest;
 
+use OCP\IDBConnection;
 use OCP\IL10N;
 use \OCP\IRequest;
 use \OCP\AppFramework\ApiController;
 use \OCP\AppFramework\Http\JSONResponse;
 use \OCP\AppFramework\Http;
-use \OCP\IDb;
+use \OC\User\Manager;
 use \OCA\Bookmarks\Controller\Lib\Bookmarks;
 use \OCA\Bookmarks\Controller\Lib\ExportResponse;
 use \OCA\Bookmarks\Controller\Lib\Helper;
@@ -28,13 +27,19 @@ class BookmarkController extends ApiController {
 	private $userId;
 	private $db;
 	private $l10n;
+	private $userManager;
 
-	public function __construct($appName, IRequest $request, $userId, IDb $db, IL10N $l10n) {
+	/** @var Bookmarks */
+	private $bookmarks;
+
+	public function __construct($appName, IRequest $request, $userId, IDBConnection $db, IL10N $l10n, Bookmarks $bookmarks, Manager $userManager) {
 		parent::__construct($appName, $request);
 		$this->userId = $userId;
 		$this->db = $db;
 		$this->request = $request;
 		$this->l10n = $l10n;
+		$this->bookmarks = $bookmarks;
+		$this->userManager = $userManager;
 	}
 
 	/**
@@ -55,27 +60,81 @@ class BookmarkController extends ApiController {
 	 * @param string $tag
 	 * @param int $page
 	 * @param string $sort
+	 * @param string user
+	 * @param array tags
+	 * @param string conjunction
+	 * @param string sortby
+	 * @param array search
 	 * @return JSONResponse
 	 *
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @CORS
 	 */
-	public function getBookmarks($type = "bookmark", $tag = '', $page = 0, $sort = "bookmarks_sorting_recent") {
-
-		if ($type == 'rel_tags') {
-			$tags = Bookmarks::analyzeTagRequest($tag);
-			$qtags = Bookmarks::findTags($this->userId, $this->db, $tags);
+	public function getBookmarks(
+		$type = "bookmark",
+		$tag = '', // legacy
+		$page = 0,
+		$sort = "bookmarks_sorting_recent", // legacy
+		$user = null,
+		$tags = array(),
+		$conjunction = "or",
+		$sortby = "",
+		$search = array()
+	) {
+		if ($user === null) {
+			$user = $this->userId;
+			$publicOnly = false;
+		}else {
+			$publicOnly = true;
+			if ($this->userManager->userExists($user) == false) {
+				$error = "User could not be identified";
+				return new JSONResponse(array('status' => 'error', 'data'=> $error));
+			}
+		}
+		if ($type === 'rel_tags' && !$publicOnly) { // XXX: libbookmarks#findTags needs a publicOnly option
+			$tags = $this->bookmarks->analyzeTagRequest($tag);
+			$qtags = $this->bookmarks->findTags($user, $tags);
 			return new JSONResponse(array('data' => $qtags, 'status' => 'success'));
 		} else { // type == bookmark
-			$filterTag = Bookmarks::analyzeTagRequest($tag);
+			$filterTag = $this->bookmarks->analyzeTagRequest($tag);
+			if (!is_array($tags)) {		
+				if(is_string($tags) && $tags !== '') {		
+					$tags = [ $tags ];		
+				} else {		
+					$tags = array();		
+				}		
+			}
+			$tagsOnly = true;
+			if (count($search) > 0) {
+				$tags = array_merge($tags, $search);
+				$tagsOnly = false;
+			}
+			if (count($tags) > 0) {
+				$filterTag = $tags;
+			}
 
+			$limit = 10;
 			$offset = $page * 10;
+			if ($page == -1) {
+				$limit = -1;
+				$offset = 0;
+			}
 
-			if ($sort == 'bookmarks_sorting_clicks') {
+			if ($sort === 'bookmarks_sorting_clicks') {
 				$sqlSortColumn = 'clickcount';
 			} else {
 				$sqlSortColumn = 'lastmodified';
 			}
-			$bookmarks = Bookmarks::findBookmarks($this->userId, $this->db, $offset, $sqlSortColumn, $filterTag, true);
+			if ($sortby) {
+				$sqlSortColumn = $sortby;
+			}
+			
+			$attributesToSelect = array('url', 'title', 'id', 'user_id', 'description', 'public',
+				'added', 'lastmodified', 'clickcount', 'tags');		
+
+			$bookmarks = $this->bookmarks->findBookmarks($user, $offset, $sqlSortColumn, $filterTag,
+				$tagsOnly, $limit, $publicOnly, $attributesToSelect, $conjunction);
 			return new JSONResponse(array('data' => $bookmarks, 'status' => 'success'));
 		}
 	}
@@ -83,57 +142,54 @@ class BookmarkController extends ApiController {
 	/**
 	 * @param string $url
 	 * @param array $item
-	 * @param int $from_own
 	 * @param string $title
 	 * @param bool $is_public
 	 * @param string $description
 	 * @return JSONResponse
 	 *
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @CORS
 	 */
-	public function newBookmark($url = "", $item = array(), $from_own = 0, $title = "", $is_public = false, $description = "") {
-		$url_http = $url_https = '';
-		if ($from_own == 0) {
+	public function newBookmark($url = "", $item = array(), $title = "", $is_public = false, $description = "") {
+		$title = trim($title);
+		if ($title === '') {
+			$title = $url;
 			// allow only http(s) and (s)ftp
 			$protocols = '/^(https?|s?ftp)\:\/\//i';
 			try {
 				if (preg_match($protocols, $url)) {
-					$data = Bookmarks::getURLMetadata($url);
-					// if not (allowed) protocol is given, assume http and https (and fetch both)
+					$data = $this->bookmarks->getURLMetadata($url);
+					$title = isset($data['title']) ? $data['title'] : $title;
 				} else {
-					// append https to url and fetch it
-					$url_https = 'https://' . $url;
-					$data_https = Bookmarks::getURLMetadata($url_https);
-					// append http to url and fetch it
-					$url_http = 'http://' . $url;
-					$data_http = Bookmarks::getURLMetadata($url_http);
+					// if no allowed protocol is given, evaluate https and https
+					foreach(['https://', 'http://'] as $protocol) {
+						$testUrl = $protocol . $url;
+						$data = $this->bookmarks->getURLMetadata($testUrl);
+						if(isset($data['title'])) {
+							$title = $data['title'];
+							$url   = $testUrl;
+							break;
+						}
+					}
 				}
 			} catch (\Exception $e) {
-				return new JSONResponse(array('status' => 'error'), Http::STATUS_BAD_REQUEST);
-			}
-
-			if ($title === '' && isset($data['title'])) { // prefer original url if working
-				$title = $data['title'];
-				//url remains unchanged
-			} elseif (isset($data_https['title'])) { // test if https works
-				$title = $title === '' ? $data_https['title'] : $title;
-				$url = $url_https;
-			} elseif (isset($data_http['title'])) { // otherwise test http for results
-				$title = $title === '' ? $data_http['title'] : $title;
-				$url = $url_http;
+				// only because the server cannot reach a certain URL it does not
+				// mean the user's browser cannot.
+				\OC::$server->getLogger()->logException($e, ['app' => 'bookmarks']);
 			}
 		}
 
 		// Check if it is a valid URL (after adding http(s) prefix)
 		$urlData = parse_url($url);
-		if ($urlData === false || !isset($urlData['scheme']) || !isset($urlData['host'])) {
+		if(!$this->isProperURL($urlData)) {
 			return new JSONResponse(array('status' => 'error'), Http::STATUS_BAD_REQUEST);
 		}
 
 		$tags = isset($item['tags']) ? $item['tags'] : array();
 
-		$id = Bookmarks::addBookmark($this->userId, $this->db, $url, $title, $tags, $description, $is_public);
-		$bm = Bookmarks::findUniqueBookmark($id, $this->userId, $this->db);
+		$id = $this->bookmarks->addBookmark($this->userId, $url, $title, $tags, $description, $is_public);
+		$bm = $this->bookmarks->findUniqueBookmark($id, $this->userId);
 		return new JSONResponse(array('item' => $bm, 'status' => 'success'));
 	}
 
@@ -148,11 +204,12 @@ class BookmarkController extends ApiController {
 	 * @return Http\TemplateResponse
 	 *
 	 * @NoAdminRequired
+	 * @CORS
 	 */
 	//TODO id vs record_id?
 	public function legacyEditBookmark($id = null, $url = "", $item = array(), $title = "", $is_public = false, $record_id = null, $description = "") {
 		if ($id == null) {
-			return $this->newBookmark($url, $item, false, $title, $is_public, $description);
+			return $this->newBookmark($url, $item, $title, $is_public, $description);
 		} else {
 			return $this->editBookmark($id, $url, $item, $title, $is_public, $record_id, $description);
 		}
@@ -169,26 +226,44 @@ class BookmarkController extends ApiController {
 	 * @return JSONResponse
 	 *
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @CORS
 	 */
-	public function editBookmark($id = null, $url = "", $item = array(), $title = "", $is_public = false, $record_id = null, $description = "") {
+	public function editBookmark($id = null, $url = null, $item = null, $title = null, $is_public = null, $record_id = null, $description = null) {
 
-		// Check if it is a valid URL
-		$urlData = parse_url($url);
-		if ($urlData === false || !isset($urlData['scheme']) || !isset($urlData['host'])) {
+		if ($record_id !== null) {
+			$id = $record_id;
+		}
+		
+		$bookmark = $this->bookmarks->findUniqueBookmark($id, $this->userId);
+		$newProps = [
+			'url' => $url,
+			'title' => $title,
+			'is_public' => $is_public,
+			'description' => $description
+		];
+		if (is_array($item) && isset($item['tags']) && is_array($item['tags'])) {
+			$newProps['tags'] = $item['tags'];
+		}
+		foreach ($newProps as $prop => $value) {
+			if(!is_null($value)) {
+				$bookmark[$prop] = $value;
+			}
+		}
+
+		// Check if url and id are valid
+		$urlData = parse_url($bookmark['url']);
+		if(!$this->isProperURL($urlData) || !is_numeric($bookmark['id'])) {
 			return new JSONResponse(array(), Http::STATUS_BAD_REQUEST);
 		}
 
-		if ($record_id == null) {
-			return new JSONResponse(array(), Http::STATUS_BAD_REQUEST);
+		if ($bookmark['tags'] === false) {
+			$bookmark['tags'] = [];
 		}
 
-		$tags = isset($item['tags']) ? $item['tags'] : array();
+		$id = $this->bookmarks->editBookmark($this->userId, $bookmark['id'], $bookmark['url'], $bookmark['title'], $bookmark['tags'], $bookmark['description'], $bookmark['is_public']);
 
-		if (is_numeric($record_id)) {
-			$id = Bookmarks::editBookmark($this->userId, $this->db, $record_id, $url, $title, $tags, $description, $is_public = false);
-		}
-
-		$bm = Bookmarks::findUniqueBookmark($id, $this->userId, $this->db);
+		$bm = $this->bookmarks->findUniqueBookmark($id, $this->userId);
 		return new JSONResponse(array('item' => $bm, 'status' => 'success'));
 	}
 
@@ -207,13 +282,15 @@ class BookmarkController extends ApiController {
 	 * @return \OCP\AppFramework\Http\JSONResponse
 	 *
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @CORS
 	 */
 	public function deleteBookmark($id = -1) {
 		if ($id == -1) {
 			return new JSONResponse(array(), Http::STATUS_BAD_REQUEST);
 		}
 
-		if (!Bookmarks::deleteUrl($this->userId, $this->db, $id)) {
+		if (!$this->bookmarks->deleteUrl($this->userId, $id)) {
 			return new JSONResponse(array(), Http::STATUS_BAD_REQUEST);
 		} else {
 			return new JSONResponse(array('status' => 'success'), Http::STATUS_OK);
@@ -221,36 +298,46 @@ class BookmarkController extends ApiController {
 	}
 
 	/**
-	  @NoAdminRequired
 	 * 
 	 * @param string $url
 	 * @return \OCP\AppFramework\Http\JSONResponse
+	 *
+	 * @NoAdminRequired
 	 */
 	public function clickBookmark($url = "") {
-
-		// Check if it is a valid URL
+		$url = urldecode($url);
 		$urlData = parse_url($url);
-		if ($urlData === false || !isset($urlData['scheme']) || !isset($urlData['host'])) {
-			return new JSONResponse(array(), Http::STATUS_BAD_REQUEST);
+		if(!$this->isProperURL($urlData)) {
+			return new JSONResponse([], Http::STATUS_BAD_REQUEST);
+		}
+		// prepare url for query
+		$url = $this->db->escapeLikeParameter(htmlspecialchars_decode($url));
+
+		$config = \OC::$server->getConfig();
+		$escape = '';
+		if(
+			strpos($config->getSystemValue('dbtype'),'sqlite') !== false
+			&& version_compare($config->getSystemValue('version'), 12, '<')
+		) {
+			// sqlite requires the ESCAPE declaration, which is added per default as of Nc 12
+			$escape = ' ESCAPE \'\\\'';
 		}
 
-		$query = $this->db->prepareQuery('
-			UPDATE `*PREFIX*bookmarks`
-			SET `clickcount` = `clickcount` + 1
-			WHERE `user_id` = ?
-				AND `url` LIKE ?
-		');
+		$qb = $this->db->getQueryBuilder();
+		$qb->update('bookmarks')
+			->set('clickcount', $qb->createFunction('`clickcount` +1'))
+			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($this->userId)))
+			->andWhere($qb->expr()->like('url', $qb->createNamedParameter($url)) . $escape)
+			->execute();
 
-		$params = array($this->userId, htmlspecialchars_decode($url));
-		$query->execute($params);
-
-		return new JSONResponse(array('status' => 'success'), Http::STATUS_OK);
+		return new JSONResponse(['status' => 'success'], Http::STATUS_OK);
 	}
 
 	/**
-	  @NoAdminRequired
 	 * 
 	 * @return \OCP\AppFramework\Http\JSONResponse
+	 *
+	 * @NoAdminRequired
 	 */
 	public function importBookmark() {
 		$full_input = $this->request->getUploadedFile("bm_import");
@@ -263,7 +350,7 @@ class BookmarkController extends ApiController {
 			$error = array();
 			$file = $full_input['tmp_name'];
 			if ($full_input['type'] == 'text/html') {
-				$error = Bookmarks::importFile($this->userId, $this->db, $file);
+				$error = $this->bookmarks->importFile($this->userId, $file);
 				if (empty($error)) {
 					return new JSONResponse(array('status' => 'success'));
 				}
@@ -276,9 +363,9 @@ class BookmarkController extends ApiController {
 	}
 
 	/**
-	  @NoAdminRequired
 	 * 
 	 * @return \OCP\AppFramework\Http\Response
+	 * @NoAdminRequired
 	 */
 	public function exportBookmark() {
 
@@ -292,7 +379,7 @@ Do Not Edit! -->
 <H1>Bookmarks</H1>
 <DL><p>
 EOT;
-		$bookmarks = Bookmarks::findBookmarks($this->userId, $this->db, 0, 'id', array(), true, -1);
+		$bookmarks = $this->bookmarks->findBookmarks($this->userId, 0, 'id', [], true, -1);
 		foreach ($bookmarks as $bm) {
 			$title = $bm['title'];
 			if (trim($title) === '') {
@@ -307,6 +394,19 @@ EOT;
 		}
 
 		return new ExportResponse($file);
+	}
+
+	/**
+	 * Checks whether parse_url was able to return proper URL data
+	 *
+	 * @param bool|array $urlData result of parse_url
+	 * @return bool
+	 */
+	protected function isProperURL($urlData) {
+		if ($urlData === false || !isset($urlData['scheme']) || !isset($urlData['host'])) {
+			return false;
+		}
+		return true;
 	}
 
 }

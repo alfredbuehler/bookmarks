@@ -1,14 +1,12 @@
 <!--
-Thanks for reporting issues back to ownCloud! This is the issue tracker of ownCloud, if you have any support question please check out https://owncloud.org/support
-
-This is the bug tracker for the Server component. Find other components at https://github.com/owncloud/core/blob/master/CONTRIBUTING.md#guidelines
+Thanks for reporting issues back to Bookmarks! This is the issue tracker of Bookmarks, if you have any support question please check out https://nextcloud.com/support
 
 To make it possible for us to help you please fill out below information carefully.
 --> 
 ### Steps to reproduce
-1. 
-2. 
-3. 
+1.
+2.
+3.
 
 ### Expected behaviour
 Tell us what should happen
@@ -17,6 +15,10 @@ Tell us what should happen
 Tell us what happens instead
 
 ### Server configuration
+<!--
+You can use the Issue Template application to prefill most of the required information: https://apps.nextcloud.com/apps/issuetemplate
+-->
+
 **Operating system**:
 
 **Web server:**
@@ -25,18 +27,16 @@ Tell us what happens instead
 
 **PHP version:**
 
-**ownCloud version:** (see ownCloud admin page)
+**Nextcloud version:** (see Nextcloud admin page)
 
-**Bookmarks version:** (see ownCloud apps page)
+**Bookmarks version:** (see Nextcloud apps page)
 
-**Updated from an older ownCloud or fresh install:**
+**Updated from an older Nextcloud or fresh install:**
 
-**Where did you install ownCloud from:**
-
-**Signing status (ownCloud 9.0 and above):**
+**Signing status:**
 
 ```
-Login as admin user into your ownCloud and access 
+Login as admin user into your Nextcloud and access 
 http://example.com/index.php/settings/integrity/failed 
 paste the results here.
 ```
@@ -46,21 +46,20 @@ paste the results here.
 ```
 If you have access to your command line run e.g.:
 sudo -u www-data php occ app:list
-from within your ownCloud installation folder
+from within your Nextcloud installation folder
 ```
 
-**The content of config/config.php:**
+**Nextcloud configuration:**
 
 ```
 If you have access to your command line run e.g.:
 sudo -u www-data php occ config:list system
-from within your ownCloud installation folder
+from within your instance's installation folder
 
-or 
+or
 
 Insert your config.php content here
-(Without the database password, passwordsalt and secret)
-```
+Make sure to remove all sensitive content such as passwords. (e.g. database password, passwordsalt, secret, smtp password, …)
 
 **Are you using external storage, if yes which one:** local/smb/sftp/...
 
@@ -73,7 +72,7 @@ Insert your config.php content here
 ```
 With access to your command line run e.g.:
 sudo -u www-data php occ ldap:show-config
-from within your ownCloud installation folder
+from within your Nextcloud installation folder
 
 Without access to your command line download the data/owncloud.db to your local
 computer or access your SQL server remotely and run the select query:
@@ -94,9 +93,9 @@ Eventually replace sensitive data as the name/IP-address of your LDAP server or 
 Insert your webserver log here
 ```
 
-#### ownCloud log (data/owncloud.log)
+#### Nextcloud log (data/nextcloud.log)
 ```
-Insert your ownCloud log here
+Insert your Nextcloud log here
 ```
 
 #### Browser log
