@@ -40,9 +40,8 @@ class ExportResponse extends Response {
 		}
 
 		$userName = $user->getDisplayName();
-		$productName = \OC::$server->getThemingDefaults()->getName();
 
-		$export_name = '"' . $productName . ' Bookmarks (' . $userName . ') (' . date('Y-m-d') . ').html"';
+		$export_name =  '"ownCloud Bookmarks (' . $userName . ') (' . date('Y-m-d') . ').html"';
 		$this->addHeader("Cache-Control", "private");
 		$this->addHeader("Content-Type", " application/stream");
 		$this->addHeader("Content-Length", strlen($returnstring));
