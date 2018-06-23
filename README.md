@@ -1,7 +1,7 @@
 Bookmarks app
 ============
 
-![](https://github.com/mondjunge/bookmarks/raw/master/screenshots/main.png)
+![](https://github.com/alfredbuehler/bookmarks/raw/master/screenshots/main.png)
 
 Maintainers:
 ------------
@@ -192,4 +192,3 @@ POST /apps/bookmarks/public/rest/v2/tag?old_name=politics&new_name=satire
 ```
 { "status": "success"}
 ```
-
