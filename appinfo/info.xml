@@ -64,12 +64,12 @@ Rewrite by [Stefan Klemm] aka ganomi (https://github.com/ganomi)
     <summary>Bookmark manager for ownCloud</summary>
 	<licence>AGPL</licence>
 	<author>Arthur Schiwon, Marvin Thomas Rabe, Stefan Klemm</author>
-	<version>0.10.2</version>
+	<version>0.10.3</version>
 	<category>productivity</category>
-	<website>https://github.com/mondjunge/bookmarks</website>
-	<bugs>https://github.com/mondjunge/bookmarks/issues</bugs>
-	<repository type="git">https://github.com/mondjunge/bookmarks.git</repository>
-    <screenshot>https://raw.githubusercontent.com/mondjunge/bookmarks/master/screenshots/main.png</screenshot>
+	<website>https://github.com/alfredbuehler/bookmarks</website>
+	<bugs>https://github.com/alfredbuehler/bookmarks/issues</bugs>
+	<repository type="git">https://github.com/alfredbuehler/bookmarks.git</repository>
+    <screenshot>https://raw.githubusercontent.com/alfredbuehler/bookmarks/master/screenshots/main.png</screenshot>
 	<dependencies>
 		<owncloud min-version="9.0" max-version="10.0" />
 	</dependencies>
