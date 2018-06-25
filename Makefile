@@ -2,8 +2,11 @@
 app_name=bookmarks
 version=$(shell grep 'version>' $(CURDIR)/appinfo/info.xml | cut -d'>' -f2 | cut -d'<' -f1)
 
-build_dir=./build
+build_dir=$(CURDIR)/build
 cert_dir=$(HOME)/.owncloud
+
+config_dir=../../config
+occ=../../occ
 
 appstore_build_dir=$(build_dir)/appstore/$(app_name)
 appstore_artifact_dir=$(build_dir)/artifacts/appstore
@@ -13,26 +16,23 @@ source_build_dir=$(build_dir)/source/$(app_name)
 source_artifact_dir=$(build_dir)/artifacts/source
 source_package_file=$(source_artifact_dir)/$(app_name)-$(version)
 
-# WOZU? configdir=$(CURDIR)/../../config
-
 private_key=$(cert_dir)/$(app_name).key
 certificate=$(cert_dir)/$(app_name).crt
 
-occ=../../occ
 sign=php -f $(occ) integrity:sign-app --privateKey="$(private_key)" --certificate="$(certificate)"
 sign_skip_msg="*** Signing skipped due to missing files."
 
 ifneq (,$(wildcard $(private_key)))
 ifneq (,$(wildcard $(certificate)))
 ifneq (,$(wildcard $(occ)))
-	CAN_SIGN=true
+CAN_SIGN=true
 endif
 endif
 endif
 
 .PHONY: all source appstore clean
 
-all: source appstore
+all: appstore source
 
 clean:
 	rm -rf $(build_dir)
@@ -44,15 +44,16 @@ source:
 	--exclude=/build \
 	--exclude=/.git
 ifdef CAN_SIGN
-	# mv $(configdir)/config.php $(configdir)/config-2.php
+	mv $(config_dir)/config.php $(config_dir)/config-2.php
 	$(sign) --path "$(source_build_dir)"
-	# mv $(configdir)/config-2.php $(configdir)/config.php
+	mv $(config_dir)/config-2.php $(config_dir)/config.php
 else
 	@echo $(sign_skip_msg)
 endif
 	tar -czf $(source_package_file).tar.gz -C $(source_build_dir)/../ $(app_name)
 
 appstore:
+	rm -rf $(appstore_build_dir) $(appstore_artifact_dir)
 	mkdir -p $(appstore_build_dir) $(appstore_artifact_dir)
 	rsync -r . $(appstore_build_dir) \
 	--exclude=/build \
@@ -73,9 +74,9 @@ appstore:
 	--exclude=/.travis.yml \
 	--exclude=/Makefile
 ifdef CAN_SIGN
-	# mv $(configdir)/config.php $(configdir)/config-2.php
+	mv $(config_dir)/config.php $(config_dir)/config-2.php
 	$(sign) --path="$(appstore_build_dir)"
-	# mv $(configdir)/config-2.php $(configdir)/config.php
+	mv $(config_dir)/config-2.php $(config_dir)/config.php
 else
 	@echo $(sign_skip_msg)
 endif
