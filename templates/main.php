@@ -60,6 +60,7 @@ function bookmarklet($bookmarkleturl) {
 
 </div>
 <div id="app-content">
+	<div id="searchresults"></div>
     <div id="emptycontent" style="display: none;">
         <p class="title"><?php
 			p($l->t('You have no bookmarks'));
