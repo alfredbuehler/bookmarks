@@ -8,6 +8,7 @@ var ajaxCallCount = 0;
 $(document).ready(function () {
 	getTags();
 	watchUrlField();
+	$('#searchbox').keyup(toggleVisibility);
 	$('#bm_import').change(attachSettingEvent);
 	$('#add_url').on('keydown keyup change click', watchUrlField);
 	$('#app-settings').on('click keydown', toggleSettings);
@@ -26,6 +27,15 @@ $(document).ready(function () {
 	}).tagit('option', 'onTagAdded', filterTagsChanged);
 	getBookmarks();
 });
+
+function toggleVisibility() {
+	if ($('#searchbox').val().length == 0) {
+		$('.bookmarks_list').show();
+	}
+	else {
+		$('.bookmarks_list').hide();
+	}
+}
 
 function getTags() {
 	jQuery.ajax({
