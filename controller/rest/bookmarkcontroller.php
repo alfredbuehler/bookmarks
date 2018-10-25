@@ -85,7 +85,7 @@ class BookmarkController extends ApiController {
 		if ($user === null) {
 			$user = $this->userId;
 			$publicOnly = false;
-		}else {
+		} else {
 			$publicOnly = true;
 			if ($this->userManager->userExists($user) == false) {
 				$error = "User could not be identified";
@@ -98,12 +98,12 @@ class BookmarkController extends ApiController {
 			return new JSONResponse(array('data' => $qtags, 'status' => 'success'));
 		} else { // type == bookmark
 			$filterTag = $this->bookmarks->analyzeTagRequest($tag);
-			if (!is_array($tags)) {		
-				if(is_string($tags) && $tags !== '') {		
-					$tags = [ $tags ];		
-				} else {		
-					$tags = array();		
-				}		
+			if (!is_array($tags)) {
+				if(is_string($tags) && $tags !== '') {
+					$tags = [ $tags ];
+				} else {
+					$tags = array();
+				}
 			}
 			$tagsOnly = true;
 			if (count($search) > 0) {
@@ -129,9 +129,9 @@ class BookmarkController extends ApiController {
 			if ($sortby) {
 				$sqlSortColumn = $sortby;
 			}
-			
+
 			$attributesToSelect = array('url', 'title', 'id', 'user_id', 'description', 'public',
-				'added', 'lastmodified', 'clickcount', 'tags');		
+				'added', 'lastmodified', 'clickcount', 'tags');
 
 			$bookmarks = $this->bookmarks->findBookmarks($user, $offset, $sqlSortColumn, $filterTag,
 				$tagsOnly, $limit, $publicOnly, $attributesToSelect, $conjunction);
@@ -234,7 +234,7 @@ class BookmarkController extends ApiController {
 		if ($record_id !== null) {
 			$id = $record_id;
 		}
-		
+
 		$bookmark = $this->bookmarks->findUniqueBookmark($id, $this->userId);
 		$newProps = [
 			'url' => $url,
@@ -298,7 +298,7 @@ class BookmarkController extends ApiController {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param string $url
 	 * @return \OCP\AppFramework\Http\JSONResponse
 	 *
@@ -334,7 +334,7 @@ class BookmarkController extends ApiController {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return \OCP\AppFramework\Http\JSONResponse
 	 *
 	 * @NoAdminRequired
@@ -363,7 +363,7 @@ class BookmarkController extends ApiController {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return \OCP\AppFramework\Http\Response
 	 * @NoAdminRequired
 	 */
