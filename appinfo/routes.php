@@ -32,6 +32,7 @@ $application->registerRoutes($this, array('routes' => array(
 	array('name' => 'internal_bookmark#click_bookmark', 'url' => '/bookmark/click', 'verb' => 'POST'),
 	array('name' => 'internal_bookmark#export_bookmark', 'url' => '/bookmark/export', 'verb' => 'GET'),
 	array('name' => 'internal_bookmark#import_bookmark', 'url' => '/bookmark/import', 'verb' => 'POST'),
+	array('name' => 'internal_bookmark#config', 'url' => '/config', 'verb' => 'POST'),
 	array('name' => 'internal_tags#full_tags', 'url' => '/tag', 'verb' => 'GET'),
 	array('name' => 'internal_tags#rename_tag', 'url' => '/tag', 'verb' => 'POST'),
 	array('name' => 'internal_tags#delete_tag', 'url' => '/tag', 'verb' => 'DELETE'),

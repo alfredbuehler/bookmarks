@@ -10,17 +10,17 @@
 
 namespace OCA\Bookmarks\Controller\Rest;
 
-use OCP\IDBConnection;
-use OCP\IL10N;
-use \OCP\IRequest;
-use \OCP\AppFramework\ApiController;
-use \OCP\AppFramework\Http\JSONResponse;
-use \OCP\AppFramework\Http;
 use \OC\User\Manager;
 use \OCA\Bookmarks\Controller\Lib\Bookmarks;
 use \OCA\Bookmarks\Controller\Lib\ExportResponse;
 use \OCA\Bookmarks\Controller\Lib\Helper;
-use OCP\Util;
+use \OCP\AppFramework\ApiController;
+use \OCP\AppFramework\Http;
+use \OCP\AppFramework\Http\JSONResponse;
+use \OCP\IDBConnection;
+use \OCP\IL10N;
+use \OCP\IRequest;
+use \OCP\Util;
 
 class BookmarkController extends ApiController {
 

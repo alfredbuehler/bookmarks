@@ -10,22 +10,37 @@
 
 namespace OCA\Bookmarks\Controller\Rest;
 
-use OCP\IDBConnection;
-use OCP\IL10N;
-use \OCP\IRequest;
-use \OCP\AppFramework\ApiController;
-use \OCP\AppFramework\Http\JSONResponse;
-use \OCP\AppFramework\Http;
 use \OC\User\Manager;
 use \OCA\Bookmarks\Controller\Lib\Bookmarks;
+use \OCA\Bookmarks\Service\SettingsService;
+use \OCP\AppFramework\ApiController;
+use \OCP\AppFramework\Http;
+use \OCP\AppFramework\Http\JSONResponse;
+use \OCP\IConfig;
+use \OCP\IDBConnection;
+use \OCP\IL10N;
+use \OCP\IRequest;
 
 class InternalBookmarkController extends ApiController {
 
 	private $publicController;
+    private $config;
+    private $appname;
+    private $userid;
 
-	public function __construct($appName, IRequest $request, $userId, IDBConnection $db, IL10N $l10n, Bookmarks $bookmarks, Manager $userManager) {
-		parent::__construct($appName, $request);
-	  $this->publicController = new BookmarkController($appName, $request, $userId, $db, $l10n, $bookmarks, $userManager);
+	public function __construct($appName,
+                                IRequest $request,
+                                $userId,
+                                IDBConnection $db,
+                                IL10N $l10n,
+                                Bookmarks $bookmarks,
+                                Manager $userManager,
+                                IConfig $config) {
+        parent::__construct($appName, $request);
+        $this->appname = $appName;
+        $this->userid = $userId;
+        $this->publicController = new BookmarkController($appName, $request, $userId, $db, $l10n, $bookmarks, $userManager);
+		$this->config = new SettingsService($appName, $config, $userId);
 	}
 
 	/**
@@ -53,6 +68,7 @@ class InternalBookmarkController extends ApiController {
 		$sortby = "",
 		$search = array()
 	) {
+		$sortby = $this->config->get('sort-by');
 		return $this->publicController->getBookmarks($type, $tag, $page, $sort, $user, $tags, $conjunction, $sortby, $search);
 	}
 
@@ -123,7 +139,7 @@ class InternalBookmarkController extends ApiController {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param string $url
 	 * @return \OCP\AppFramework\Http\JSONResponse
 	 * @NoAdminRequired
@@ -133,7 +149,7 @@ class InternalBookmarkController extends ApiController {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return \OCP\AppFramework\Http\JSONResponse
 	 * @NoAdminRequired
 	 */
@@ -142,11 +158,19 @@ class InternalBookmarkController extends ApiController {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return \OCP\AppFramework\Http\Response
 	 * @NoAdminRequired
 	 */
 	public function exportBookmark() {
 		return $this->publicController->exportBookmark();
 	}
+
+    /**
+	 * @NoAdminRequired
+	 */
+    public function config($key, $value) {
+		$this->config->set($key, $value);
+	}
+
 }

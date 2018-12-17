@@ -108,7 +108,7 @@ class Bookmarks {
 			->where($qb->expr()->eq('user_id', $qb->createNamedParameter($userId)))
 			->andWhere($qb->expr()->eq('id', $qb->createNamedParameter($id)));
 		$result = $qb->execute()->fetch();
-		
+
 		$qb = $this->db->getQueryBuilder();
 		$qb
 			->select('tag')
@@ -173,9 +173,9 @@ class Bookmarks {
 			'public', 'added', 'lastmodified', 'clickcount',);
 
 		$returnTags = true;
-		
+
 		$qb = $this->db->getQueryBuilder();
-		
+
 		if ($requestedAttributes != null) {
 			$key = array_search('tags', $requestedAttributes);
 			if ($key == false) {
@@ -208,12 +208,12 @@ class Bookmarks {
 		if ($public) {
 			$qb->andWhere($qb->expr()->eq('public', $qb->createNamedParameter(1)));
 		}
-		
+
 		if (count($filters) > 0) {
 			$this->findBookmarksBuildFilter($qb, $filters, $filterTagOnly, $tagFilterConjunction);
 		}
 
-		$qb->orderBy($sqlSortColumn, 'DESC');
+		$qb->orderBy($sqlSortColumn, $sqlSortColumn === 'title' ? 'ASC' : 'DESC');
 		if ($limit != -1 && $limit !== false) {
 			$qb->setMaxResults($limit);
 			if ($offset != null) {
@@ -468,7 +468,7 @@ class Bookmarks {
 		$description = mb_substr($description, 0, 4096);
 
 		// Change lastmodified date if the record if already exists
-		
+
 		$qb = $this->db->getQueryBuilder();
 		$qb
 			->select('*')
@@ -480,7 +480,7 @@ class Bookmarks {
 			'url' => '%' . $this->db->escapeLikeParameter($decodedUrlNoPrefix)
 		]);
 		$row = $qb->execute()->fetch();
-		
+
 		if ($row) {
 			$qb = $this->db->getQueryBuilder();
 			$qb
@@ -527,7 +527,7 @@ class Bookmarks {
 				'title' => htmlspecialchars_decode($title), // XXX: Should the title update above also decode it first?
 				'public' => $public,
 				'description' => $description
-			));	
+			));
 
 			$qb->execute();
 
@@ -626,7 +626,7 @@ class Bookmarks {
 	public function getURLMetadata($url, $tryHarder = false) {
 		$metadata = ['url' => $url];
 		$page = $contentType = '';
-		
+
 		try {
 			$client = $this->httpClientService->newClient();
 			$options = [];
@@ -657,7 +657,7 @@ class Bookmarks {
 		} catch (\Exception $e) {
 			throw $e;
 		}
-		
+
 		//Check for encoding of site.
 		//If not UTF-8 convert it.
 		$encoding = array();
@@ -679,12 +679,12 @@ class Bookmarks {
 			}
 
 			preg_match("/<title>(.*)<\/title>/si", $page, $match);
-			
+
 			if (isset($match[1])) {
 				$metadata['title'] = html_entity_decode($match[1]);
 			}
 		}
-		
+
 		return $metadata;
 	}
 
