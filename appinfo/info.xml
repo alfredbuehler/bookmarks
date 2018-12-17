@@ -13,7 +13,7 @@
    <repository type="git">https://github.com/alfredbuehler/bookmarks.git</repository>
    <screenshot>https://raw.githubusercontent.com/alfredbuehler/bookmarks/master/screenshots/main.png</screenshot>
    <dependencies>
-      <owncloud min-version="9.0" max-version="10.0" />
+      <owncloud min-version="9.0" max-version="10" />
    </dependencies>
    <ocsid>168710</ocsid>
 </info>
