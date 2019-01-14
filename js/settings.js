@@ -1,3 +1,4 @@
+
 function attachSettingEvent(event) {
 	event.preventDefault();
 	fileUpload($(this).closest('form'), $('#upload'));
@@ -61,3 +62,27 @@ function fileUpload(form, resultDiv) {
 
 	resultDiv.text(t('bookmark', 'Uploading...'));
 }
+
+$(function () {
+
+	$('#sort-by').val($('#sortbycurr').val());
+
+	$('#sort-by').change(function(e) {
+		var url = OC.generateUrl('/apps/bookmarks/config?key='
+			+ e.target.id + '&value=' + e.target.value);
+		$.post(url).success(function (response) {
+			filterTagsChanged();
+		});
+	});
+
+ 	$('#confirm-delete').prop('checked', $('#confirmcurr').val() === '1');
+
+	$('#confirm-delete').change(function(e) {
+        var url = OC.generateUrl('/apps/bookmarks/config?key='
+            + e.target.id + '&value=' + ($(this).prop('checked') ? '1' : '0'));
+	    $.post(url).success(function (response) {
+			document.getElementById(confirmcurr).value = e.target.checked ? 1 : 0;
+        });
+    });
+
+});

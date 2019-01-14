@@ -10,12 +10,15 @@
 
 namespace OCA\Bookmarks\Controller;
 
-use OCP\AppFramework\Http\ContentSecurityPolicy;
-use \OCP\IRequest;
-use \OCP\AppFramework\Http\TemplateResponse;
-use \OCP\AppFramework\Controller;
+use \OCA\Bookmarks\Service\SettingsService;
+
 use \OCA\Bookmarks\Controller\Lib\Bookmarks;
-use OCP\IURLGenerator;
+use \OCP\AppFramework\Controller;
+use \OCP\AppFramework\Http\ContentSecurityPolicy;
+use \OCP\AppFramework\Http\TemplateResponse;
+use \OCP\IConfig;
+use \OCP\IRequest;
+use \OCP\IURLGenerator;
 
 class WebViewController extends Controller {
 
@@ -28,6 +31,8 @@ class WebViewController extends Controller {
 	/** @var Bookmarks */
 	private $bookmarks;
 
+    private $config;
+
 	/**
 	 * WebViewController constructor.
 	 *
@@ -36,12 +41,19 @@ class WebViewController extends Controller {
 	 * @param $userId
 	 * @param IURLGenerator $urlgenerator
 	 * @param Bookmarks $bookmarks
+     * @param IConfig $config
 	 */
-	public function __construct($appName, IRequest $request, $userId, IURLGenerator $urlgenerator, Bookmarks $bookmarks) {
+	public function __construct($appName,
+                                IRequest $request,
+                                $userId,
+                                IURLGenerator $urlgenerator,
+                                Bookmarks $bookmarks,
+                                IConfig $config) {
 		parent::__construct($appName, $request);
 		$this->userId = $userId;
 		$this->urlgenerator = $urlgenerator;
 		$this->bookmarks = $bookmarks;
+        $this->config = new SettingsService($appName, $config, $userId);
 	}
 
 	/**
@@ -49,8 +61,14 @@ class WebViewController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index() {
+
+		$settings = $this->config->getall();
 		$bookmarkleturl = $this->urlgenerator->getAbsoluteURL('index.php/apps/bookmarks/bookmarklet');
-		$params = array('user' => $this->userId, 'bookmarkleturl' => $bookmarkleturl);
+		$params = array(
+			'user' => $this->userId,
+			'bookmarkleturl' => $bookmarkleturl,
+			'settings' => $settings
+		);
 
 		$policy = new ContentSecurityPolicy();
 		$policy->addAllowedFrameDomain("'self'");

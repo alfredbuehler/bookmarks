@@ -28,9 +28,26 @@
 		<input type="hidden" name="requesttoken" value="<?php p($_['requesttoken']) ?>" id="requesttoken">
 		<button type="button" name="bm_import_btn" id="bm_import_submit"><?php p($l->t('Import')); ?></button>
 		<div id="upload"></div>
-
-
-
 		</li>
+
+		<legend><strong><?php p($l->t('Sorting etc.')); ?></strong></legend>
+		<li class="settings-fieldset-interior-item">
+			<select id="sort-by">
+		       <option value="title">title</option>
+		       <option value="lastmodified" selected>lastmodified</option>
+		       <option value="clickcount">clickcount</option>
+		     </select>
+		</li>
+
+		<li class="settings-fieldset-interior-item">
+			<input class="checkbox" type="checkbox" id="confirm-delete" />
+			<label class="checkbox" for="confirm-delete">
+				<?php p($l->t('Confirm delete')); ?>
+			</label>
+		</li>
+
 	</ul>
 </form>
+
+<input type="hidden" id="sortbycurr"    value="<?php p($_['settings']['sort-by']); ?>" />
+<input type="hidden" id="confirmcurr"   value="<?php p($_['settings']['confirm-delete']); ?>" />

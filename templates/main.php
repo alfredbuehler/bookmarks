@@ -49,7 +49,9 @@ function bookmarklet($bookmarkleturl) {
 
     <div id="app-settings">
         <div id="app-settings-header">
-            <button class="settings-button generalsettings" data-apps-slide-toggle="#app-settings-content" tabindex="0"></button>
+            <button class="settings-button generalsettings" data-apps-slide-toggle="#app-settings-content" tabindex="0">
+				<?php p($l->t('Settings'));?>
+			</button>
         </div>
         <div id="app-settings-content">
 

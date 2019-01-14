@@ -240,8 +240,7 @@ function addBookmark(event) {
 
 function delBookmark() {
 	var record = $(this).parent().parent();
-	OC.dialogs.confirm(t('bookmarks', 'Are you sure you want to remove this bookmark?'),
-			t('bookmarks', 'Warning'), function (answer) {
+	var  delBookmarkEx = function(answer) {
 		if (answer) {
 			$.ajax({
 				type: 'DELETE',
@@ -254,7 +253,15 @@ function delBookmark() {
 				}
 			});
 		}
-	});
+	}
+
+	document.getElementById('confirm-delete').checked
+		? OC.dialogs.confirm(
+			t('bookmarks', 'Are you sure you want to remove this bookmark?'),
+			t('bookmarks', 'Warning'), function(answer) {
+				delBookmarkEx(answer);
+			})
+		: delBookmarkEx(true);
 }
 
 function checkEmpty() {
