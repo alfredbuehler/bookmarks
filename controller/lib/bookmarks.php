@@ -455,7 +455,7 @@ class Bookmarks {
 	 * @param boolean $isPublic True if the bookmark is publishable to not registered users
 	 * @return int The id of the bookmark created
 	 */
-	public function addBookmark($userid, $url, $title, $tags = array(), $description = '', $isPublic = false) {
+	public function addBookmark($userid, $url, $title, $tags = array(), $description = '', $isPublic = false, $addDate = null) {
 		$public = $isPublic ? 1 : 0;
 		$urlWithoutPrefix = trim(substr($url, strpos($url, "://") + 3)); // Removes everything from the url before the "://" pattern (included)
 		if($urlWithoutPrefix === '') {
@@ -516,18 +516,22 @@ class Bookmarks {
 					'title' => $qb->createParameter('title'),
 					'user_id' => $qb->createParameter('user_id'),
 					'public' => $qb->createParameter('public'),
-					'added' => $qb->createFunction('UNIX_TIMESTAMP()'),
+					'added' => is_null($addDate) ? $qb->createFunction('UNIX_TIMESTAMP()') : $qb->createParameter('added'),
 					'lastmodified' => $qb->createFunction('UNIX_TIMESTAMP()'),
 					'description' => $qb->createParameter('description')
 				))
 				->where($qb->expr()->eq('user_id', $qb->createParameter('user_id')));
-			$qb->setParameters(array(
+			$params = array(
 				'user_id' => $userid,
 				'url' => $decodedUrl,
 				'title' => htmlspecialchars_decode($title), // XXX: Should the title update above also decode it first?
 				'public' => $public,
 				'description' => $description
-			));
+			);
+			if (!is_null($addDate)) {
+				$params["added"] = $addDate;
+			}
+			$qb->setParameters($params);
 
 			$qb->execute();
 
@@ -600,12 +604,16 @@ class Bookmarks {
 			if ($link->hasAttribute("tags"))
 				$tagStr = $link->getAttribute("tags");
 			$tags = explode(',', $tagStr);
+			
+			$addDate = null;
+			if ($link->hasAttribute("add_date"))
+				$addDate = $link->getAttribute("add_date");
 
 			$descriptionStr = '';
 			if ($link->hasAttribute("description"))
 				$descriptionStr = $link->getAttribute("description");
 			try {
-				$this->addBookmark($user, $ref, $title, $tags, $descriptionStr);
+				$this->addBookmark($user, $ref, $title, $tags, $descriptionStr, false, $addDate);
 			} catch (\InvalidArgumentException $e) {
 				$this->logger->logException($e, ['app' => 'bookmarks']);
 				$errors[] =  $this->l->t('Failed to import one bookmark, because: ') . $e->getMessage();
