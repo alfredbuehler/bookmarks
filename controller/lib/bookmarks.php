@@ -613,7 +613,7 @@ class Bookmarks {
 			if ($link->hasAttribute("description"))
 				$descriptionStr = $link->getAttribute("description");
 			try {
-				$this->addBookmark($user, $ref, $title, $tags, $descriptionStr, $addDate);
+				$this->addBookmark($user, $ref, $title, $tags, $descriptionStr, false, $addDate);
 			} catch (\InvalidArgumentException $e) {
 				$this->logger->logException($e, ['app' => 'bookmarks']);
 				$errors[] =  $this->l->t('Failed to import one bookmark, because: ') . $e->getMessage();
